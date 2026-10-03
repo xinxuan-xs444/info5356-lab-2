@@ -1,0 +1,3 @@
+condition,parameter_value,start_time,end_time,completion_status,error,start_pose,end_pose
+A,0.0,2026-10-02T22:37:52,2026-10-02T22:37:59,Completed,,neutral (commanded + confirmed),neutral (confirmed via _return_to_neutral)
+B,1.0,2026-10-02T22:38:13,2026-10-02T22:38:21,Completed,,neutral (commanded + confirmed),neutral (confirmed via _return_to_neutral)

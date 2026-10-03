@@ -1,5 +1,5 @@
 """
-quiz_study_app -- Lab 2, Section 3 custom app (full quiz study version).
+quiz_study_app -- Lab 2, Section 3 custom app (user-study version).
 
 Combines two existing Reachy Mini components:
   1. Reachy Mini App Template (this ReachyMiniApp structure) + the SDK's
@@ -21,7 +21,15 @@ types in the judgment (correct / incorrect / repeat / interrupted /
 failed) -- the robot does not capture or process audio input at all.
 This sidesteps mic/STT reliability entirely and keeps the study focused
 on how participants react to the robot's feedback, not on speech
-recognition accuracy.
+recognition accuracy. (A separate automatic-speech-recognition version
+was prototyped -- see demo_stt_interaction.py -- but STT accuracy wasn't
+reliable enough to trust for real trial judgments, so this study's real
+data collection stays on the facilitator-judged design, same as P01-P04.)
+
+ONE CHANGE from the original P01-P04 version: audio now plays through
+the robot's own speaker (request_media_backend="webrtc") instead of the
+facilitator's laptop. Everything else -- judging method, trial flow,
+logging -- is unchanged.
 
 Run `generate_audio.py` once before the first real session to create
 every audio clip referenced below.
@@ -125,8 +133,21 @@ def preflight_check():
 
 
 class QuizStudyApp(ReachyMiniApp):
+    # The one change from the original P01-P04 version: audio now plays
+    # through the robot's own speaker instead of the facilitator's laptop.
+    # ("local"/"default" would silently fall back to laptop audio under
+    # this setup's connection mode -- confirmed earlier in this project.)
+    request_media_backend = "webrtc"
+
     def run(self, reachy_mini, stop_event):
         reachy_mini.media.start_playing()
+
+        # WebRTC negotiates its audio transceiver asynchronously in the
+        # background -- the very first clip pushed right after connecting
+        # can get silently dropped if the pipeline isn't ready yet.
+        print(f"[{timestamp()}] STAGE=webrtc_warmup Waiting for WebRTC audio to finish negotiating...")
+        time.sleep(2.0)
+
         moves = {
             True: AVAILABLE_MOVES[MOVE_NAME_CORRECT],      # (move_fn, base_params, _)
             False: AVAILABLE_MOVES[MOVE_NAME_INCORRECT],

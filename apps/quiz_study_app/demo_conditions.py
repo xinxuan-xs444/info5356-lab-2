@@ -48,8 +48,19 @@ def main():
     item_a = QUESTION_SETS[1][0]
     item_b = QUESTION_SETS[2][0]
 
-    with ReachyMini(media_backend="default") as mini:
+    # webrtc, matching main.py: routes audio through the robot's own
+    # speaker instead of this laptop's. "default" (the old value here)
+    # resolves to the laptop under this setup's connection mode, which is
+    # why this demo used to play from the laptop even after main.py moved
+    # to robot-routed audio.
+    with ReachyMini(media_backend="webrtc") as mini:
         mini.media.start_playing()
+
+        # Same WebRTC warmup pause as main.py -- the audio transceiver
+        # negotiates asynchronously, so the very first clip pushed right
+        # after connecting can get silently dropped otherwise.
+        print("Waiting for WebRTC audio to finish negotiating...")
+        time.sleep(2.0)
 
         run_one_cycle(app, mini, stop_event, "A", amplitude=0.0, item=item_a, correct=True)
         time.sleep(1.5)
